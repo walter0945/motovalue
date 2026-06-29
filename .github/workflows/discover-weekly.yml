@@ -37,3 +37,5 @@ jobs:
         env:
           CHROME_PATH: ${{ env.CHROME_PATH }}
           TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
+          TCB_SECRET_ID: ${{ secrets.TCB_SECRET_ID }}
+          TCB_SECRET_KEY: ${{ secrets.TCB_SECRET_KEY }}
