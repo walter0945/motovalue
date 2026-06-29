@@ -49,3 +49,21 @@ function markNav() {
   });
 }
 document.addEventListener('DOMContentLoaded', markNav);
+
+/* ── 移动端汉堡菜单 ── */
+document.addEventListener('DOMContentLoaded', () => {
+  const hamburger = document.getElementById('hamburger');
+  const nav = document.querySelector('.nav');
+  if (!hamburger || !nav) return;
+  hamburger.addEventListener('click', () => {
+    nav.classList.toggle('open');
+    hamburger.textContent = nav.classList.contains('open') ? '✕' : '☰';
+  });
+  // 点击导航链接后自动收起
+  nav.querySelectorAll('a').forEach((a) => {
+    a.addEventListener('click', () => {
+      nav.classList.remove('open');
+      hamburger.textContent = '☰';
+    });
+  });
+});
