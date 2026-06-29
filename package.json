@@ -10,6 +10,8 @@
     "scrape": "node server/scraper/run-once.js",
     "scrape:discover": "node server/scraper/run-once.js --discover",
     "sync-seed": "node server/scraper/sync-seed.js",
+    "build-cf": "node scripts/build-cf.js",
+    "seed-db": "node scripts/seed-db.js",
     "test": "node --test"
   },
   "engines": {
@@ -19,5 +21,8 @@
     "express": "^4.19.2",
     "node-cron": "^3.0.3",
     "puppeteer-core": "^25.2.1"
+  },
+  "devDependencies": {
+    "@cloudbase/node-sdk": "^2.0.0"
   }
 }

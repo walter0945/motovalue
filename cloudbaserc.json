@@ -1,0 +1,24 @@
+{
+  "version": "2.0",
+  "envId": "{{env.TCB_ENV_ID}}",
+  "functionRoot": "./cloudfunctions",
+  "functions": [
+    {
+      "name": "api",
+      "type": "http",
+      "runtime": "Nodejs18.15",
+      "timeout": 60,
+      "memorySize": 256,
+      "envVariables": {
+        "TCB_ENV_ID": "{{env.TCB_ENV_ID}}"
+      },
+      "installDependency": true,
+      "preDeploy": "node scripts/build-cf.js"
+    }
+  ],
+  "hosting": {
+    "root": "./public",
+    "history": false,
+    "cacheControl": "public, max-age=3600"
+  }
+}

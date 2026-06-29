@@ -13,8 +13,11 @@ import * as listings from './listings.js';
 import { getXianyuRange } from './xianyu.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+// CloudBase 共享初始化 (有 TCB_ENV_ID 时自动连接云数据库)
+import './cloudbase.js';
+
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 9000;  // CloudBase HTTP 云函数默认 9000
 
 app.use(express.json());
 app.use(express.static(join(__dirname, '..', 'public')));
@@ -224,9 +227,9 @@ app.delete('/api/listings/:id', wrap(async (req, res) => {
 app.listen(PORT, () => {
   console.info(`二手摩托估价服务已启动: http://localhost:${PORT}`);
 
-  // 抓取调度: ENABLE_SCRAPER=1 开启定时刷新
-  // SCRAPE_DISCOVER=1 额外启用全量发现(较耗时, 建议仅部署时或手动触发)
-  if (process.env.ENABLE_SCRAPER === '1') {
+  // 抓取调度: 仅在本地开发环境 + ENABLE_SCRAPER=1 时开启
+  // CloudBase 上不启动 (无 Chrome/Puppeteer 环境)
+  if (process.env.ENABLE_SCRAPER === '1' && !process.env.TCB_ENV_ID) {
     const scheduler = startScheduler({
       runOnStart: process.env.SCRAPE_ON_START === '1',
       discover: process.env.SCRAPE_DISCOVER === '1',
@@ -234,3 +237,6 @@ app.listen(PORT, () => {
     console.info(`[抓取] 定时刷新已启用 (全量发现: ${process.env.SCRAPE_DISCOVER === '1' ? '开' : '关'})`);
   }
 });
+
+// CloudBase HTTP 云函数入口
+export const main = app;

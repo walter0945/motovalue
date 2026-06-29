@@ -6,9 +6,23 @@
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => `¥${Number(n).toLocaleString('zh-CN')}`;
 
+/** 自动检测 CloudBase 环境, 设置 API 基地址 */
+const API_BASE = (() => {
+  const host = location.hostname;
+  // CloudBase 静态托管: https://{env-id}.tcloudbaseapp.com
+  // 对应云函数: https://{env-id}.service.tcloudbase.com/api
+  if (host.includes('tcloudbaseapp.com')) {
+    const envId = host.split('.')[0];
+    return `https://${envId}.service.tcloudbase.com/api`;
+  }
+  // 本地开发: 相对路径
+  return '';
+})();
+
 /** 通用 JSON 请求, 统一错误处理。 */
 async function api(path, options) {
-  const res = await fetch(path, options);
+  const url = API_BASE + path;
+  const res = await fetch(url, options);
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `请求失败 (${res.status})`);

@@ -4,14 +4,19 @@ on:
   schedule:
     # 每天北京时间 04:00 (UTC+8 = UTC 20:00 前一天)
     - cron: '0 20 * * *'
-  # 每周日北京时间 05:00 全量发现新车型
-  # (分开定义，需在 jobs 层面区分; 用 workflow_dispatch 手动触发全量发现)
   workflow_dispatch:
     inputs:
       discover:
         description: '全量发现新车型 (含摩托范遍历)'
         type: boolean
         default: false
+      target:
+        description: '写入目标'
+        type: choice
+        options:
+          - cloudbase
+          - seed-file
+        default: 'cloudbase'
 
 env:
   NODE_VERSION: '20'
@@ -39,29 +44,38 @@ jobs:
         with:
           chrome-version: stable
 
-      - name: 运行抓取
+      - name: 运行抓取 (CloudBase 模式)
+        if: github.event.inputs.target != 'seed-file'
         run: |
           if [ "${{ github.event.inputs.discover }}" = "true" ]; then
-            echo "[抓取模式] 全量发现 + 增量刷新"
+            echo "[抓取] 全量发现 + 增量刷新 → CloudBase"
             node server/scraper/run-once.js --discover
           else
-            echo "[抓取模式] 仅增量刷新"
+            echo "[抓取] 仅增量刷新 → CloudBase"
             node server/scraper/run-once.js
           fi
         env:
           CHROME_PATH: ${{ env.CHROME_PATH }}
+          TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
 
-      - name: 同步种子数据
+      - name: 运行抓取 (种子文件模式)
+        if: github.event.inputs.target == 'seed-file'
+        run: |
+          echo "[抓取] 写入本地 JSON → 后续 commit seed 文件"
+          node server/scraper/run-once.js
+        env:
+          CHROME_PATH: ${{ env.CHROME_PATH }}
+
+      - name: 同步种子数据 (仅 seed-file 模式)
+        if: github.event.inputs.target == 'seed-file'
         run: npm run sync-seed
 
-      - name: 提交更新
+      - name: 提交种子更新 (仅 seed-file 模式)
+        if: github.event.inputs.target == 'seed-file'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # 仅 commit models.seed.json (种子文件)
           git add data/models.seed.json
-
           if git diff --staged --quiet; then
             echo "数据无变化, 跳过提交"
           else
