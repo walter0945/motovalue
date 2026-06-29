@@ -1,0 +1,72 @@
+name: 车型价格抓取
+
+on:
+  schedule:
+    # 每天北京时间 04:00 (UTC+8 = UTC 20:00 前一天)
+    - cron: '0 20 * * *'
+  # 每周日北京时间 05:00 全量发现新车型
+  # (分开定义，需在 jobs 层面区分; 用 workflow_dispatch 手动触发全量发现)
+  workflow_dispatch:
+    inputs:
+      discover:
+        description: '全量发现新车型 (含摩托范遍历)'
+        type: boolean
+        default: false
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 安装 Chrome (Puppeteer 依赖)
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: 运行抓取
+        run: |
+          if [ "${{ github.event.inputs.discover }}" = "true" ]; then
+            echo "[抓取模式] 全量发现 + 增量刷新"
+            node server/scraper/run-once.js --discover
+          else
+            echo "[抓取模式] 仅增量刷新"
+            node server/scraper/run-once.js
+          fi
+        env:
+          CHROME_PATH: ${{ env.CHROME_PATH }}
+
+      - name: 同步种子数据
+        run: npm run sync-seed
+
+      - name: 提交更新
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 仅 commit models.seed.json (种子文件)
+          git add data/models.seed.json
+
+          if git diff --staged --quiet; then
+            echo "数据无变化, 跳过提交"
+          else
+            NOW=$(date -u +"%Y-%m-%d")
+            git commit -m "chore(scrape): 自动更新车型价格数据 ($NOW)"
+            git push
+            echo "已提交并推送更新"
+          fi

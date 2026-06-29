@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>车源市场 · 摩估</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🏍️ 摩估 <span>MotoValue</span></div>
+    <div class="slogan">符合国情的二手摩托车价格评估</div>
+    <nav class="nav">
+      <a href="/index.html">估价</a>
+      <a href="/market.html">市场</a>
+      <a href="/sell.html">发布</a>
+      <a href="/market.html?mine=1">我的发布</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="demo-banner">⚠️ 交易与账户功能为<b>演示占位</b>，当前不投入运营、不支持真实交易。本站核心是二手摩托车<b>科学估价</b>。</div>
+    <h1 class="page-title" id="pageTitle">车源市场</h1>
+
+    <div class="filters">
+      <select id="fBrand"><option value="">全部品牌</option></select>
+      <select id="fCategory"><option value="">全部类别</option></select>
+      <input type="number" id="fMaxPrice" placeholder="最高价(元)" min="0" step="1000" />
+      <button class="btn-ghost" id="applyFilter">筛选</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" hidden>暂无车源，去 <a href="/sell.html">发布一辆</a> 吧</div>
+  </main>
+
+  <footer class="foot">示例项目 · 个人发布的二手车源 · 估价为模型测算仅供参考</footer>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/market.js"></script>
+</body>
+</html>

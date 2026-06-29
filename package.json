@@ -1,0 +1,23 @@
+{
+  "name": "moto-resale",
+  "version": "0.1.0",
+  "description": "中国大陆二手摩托车科学估价与交易平台 (MVP: 估价引擎 + 官方价抓取)",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "scrape": "node server/scraper/run-once.js",
+    "scrape:discover": "node server/scraper/run-once.js --discover",
+    "sync-seed": "node server/scraper/sync-seed.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "node-cron": "^3.0.3",
+    "puppeteer-core": "^25.2.1"
+  }
+}

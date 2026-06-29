@@ -1,0 +1,51 @@
+/**
+ * 跨页面共享工具: 请求封装、格式化、轻量身份(ownerToken)、收藏(localStorage)。
+ */
+'use strict';
+
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => `¥${Number(n).toLocaleString('zh-CN')}`;
+
+/** 通用 JSON 请求, 统一错误处理。 */
+async function api(path, options) {
+  const res = await fetch(path, options);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `请求失败 (${res.status})`);
+  }
+  return res.json();
+}
+
+/** 客户端身份令牌(无密码 MVP): 首次访问生成并存 localStorage。 */
+function ownerToken() {
+  let t = localStorage.getItem('moto_owner');
+  if (!t) {
+    t = 'u_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('moto_owner', t);
+  }
+  return t;
+}
+
+// —— 收藏 ——
+const favKey = 'moto_favorites';
+const getFavorites = () => JSON.parse(localStorage.getItem(favKey) || '[]');
+function toggleFavorite(id) {
+  const set = new Set(getFavorites());
+  set.has(id) ? set.delete(id) : set.add(id);
+  localStorage.setItem(favKey, JSON.stringify([...set]));
+  return set.has(id);
+}
+const isFavorite = (id) => getFavorites().includes(id);
+
+/** 高亮当前导航项(同时区分 ?mine 视图)。 */
+function markNav() {
+  const here = location.pathname.split('/').pop() || 'index.html';
+  const mineNow = new URLSearchParams(location.search).get('mine') === '1';
+  document.querySelectorAll('.nav a').forEach((a) => {
+    const url = new URL(a.getAttribute('href'), location.origin);
+    const samePage = url.pathname.endsWith(here);
+    const sameMine = (url.searchParams.get('mine') === '1') === mineNow;
+    if (samePage && sameMine) a.classList.add('active');
+  });
+}
+document.addEventListener('DOMContentLoaded', markNav);

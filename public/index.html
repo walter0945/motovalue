@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>摩估 · 二手摩托车科学估价</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🏍️ 摩估 <span>MotoValue</span></div>
+    <div class="slogan">二手摩托车价格评估</div>
+    <nav class="nav">
+      <a href="/index.html">估价</a>
+      <a href="/market.html">市场</a>
+      <a href="/sell.html">发布</a>
+      <a href="/market.html?mine=1">我的发布</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <!-- 左侧: 估价表单 -->
+    <section class="card form-card">
+      <h2>填写车况，科学估价</h2>
+
+      <!-- 模式切换 -->
+      <div class="mode-tabs" id="modeTabs">
+        <button class="mode-tab active" data-mode="db">数据库车型</button>
+        <button class="mode-tab" data-mode="manual">手动输入车型</button>
+      </div>
+
+      <!-- 数据库模式 -->
+      <div class="mode-panel" id="panelDb">
+
+      <label>品牌
+        <select id="brand"></select>
+      </label>
+      <label>车型
+        <select id="model"></select>
+      </label>
+      <div class="newprice-hint" id="newPriceHint"></div>
+
+      <div class="row">
+        <label>使用年限（年）
+          <input type="number" id="ageYears" min="0" max="15" step="0.5" value="3" />
+        </label>
+        <label>行驶里程（公里）
+          <input type="number" id="mileageKm" min="0" step="500" value="20000" />
+        </label>
+      </div>
+
+      <div class="row">
+        <label>外观成色
+          <select id="appearance"></select>
+        </label>
+        <label>机械状况
+          <select id="mechanical"></select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>事故情况
+          <select id="accident"></select>
+        </label>
+        <label>改装情况
+          <select id="modification"></select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>保养记录
+          <select id="maintenance"></select>
+        </label>
+        <label>排放标准
+          <select id="emission"></select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>手续完整度
+          <select id="docs"></select>
+        </label>
+        <label>所在地政策
+          <select id="region"></select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>过户记录
+          <select id="transfer"></select>
+        </label>
+        <label></label>
+      </div>
+
+      <div class="btn-row">
+        <button id="submit" class="btn-primary">开始估价</button>
+        <button id="reloadData" class="btn-secondary" title="从服务器重新加载车型数据">🔄 刷新车型</button>
+      </div>
+      </div><!-- /panelDb -->
+
+      <!-- 手动输入模式 -->
+      <div class="mode-panel" id="panelManual" style="display:none">
+        <div class="row">
+          <label>品牌<input type="text" id="mBrand" placeholder="如 本田 / Honda" /></label>
+          <label>车型名<input type="text" id="mName" placeholder="如 CB400F" /></label>
+        </div>
+        <div class="row">
+          <label>新车指导价（元）<input type="number" id="mPrice" min="0" step="100" placeholder="官方指导价" /></label>
+          <label>排量（cc）<input type="number" id="mDisplacement" min="0" step="50" placeholder="如 399" /></label>
+        </div>
+        <div class="row">
+          <label>类别<select id="mCategory"><option>街车</option><option>跑车</option><option>踏板</option><option>复古</option><option>拉力</option><option>巡航</option><option>越野</option><option>弯梁</option></select></label>
+          <label>品牌档次<select id="mTier"><option value="IMPORT_PREMIUM">进口高端</option><option value="JOINT_VENTURE">合资主流</option><option value="DOMESTIC_TOP" selected>国产一线</option><option value="DOMESTIC_MID">国产二线</option></select></label>
+        </div>
+
+        <div class="row">
+          <label>使用年限（年）<input type="number" id="mAge" min="0" max="15" step="0.5" value="3" /></label>
+          <label>行驶里程（公里）<input type="number" id="mMileage" min="0" step="500" value="20000" /></label>
+        </div>
+        <div class="row">
+          <label>外观成色<select id="mAppearance"><option>95新</option><option selected>9成新</option><option>8成新</option><option>7成新</option><option>6成新及以下</option></select></label>
+          <label>机械状况<select id="mMechanical"><option selected>优秀</option><option>良好</option><option>一般</option><option>有故障</option></select></label>
+        </div>
+        <div class="row">
+          <label>事故情况<select id="mAccident"><option selected>无事故</option><option>轻微剐蹭</option><option>中等事故</option><option>重大/泡水/火烧</option></select></label>
+          <label>改装情况<select id="mModification"><option selected>原厂状态</option><option>轻度改装</option><option>重度改装</option></select></label>
+        </div>
+        <div class="row">
+          <label>保养记录<select id="mMaintenance"><option selected>记录完整</option><option>部分记录</option><option>无记录</option></select></label>
+          <label>过户记录<select id="mTransfer"><option selected>一手(未过户)</option><option>过户1次</option><option>过户2次</option><option>过户3次及以上</option></select></label>
+        </div>
+        <div class="row">
+          <label>排放标准<select id="mEmission"><option selected>国四</option><option>国五</option><option>国三</option><option>国二及以下</option></select></label>
+          <label>手续完整<select id="mDocs"><option selected>三证齐全</option><option>缺购车发票</option><option>缺登记证书(大绿本)</option><option>有抵押未解押</option></select></label>
+        </div>
+        <div class="row">
+          <label>所在地政策<select id="mRegion"><option selected>不禁摩</option><option>限摩限行</option><option>完全禁摩</option></select></label>
+          <label></label>
+        </div>
+
+        <button id="submitManual" class="btn-primary">计算二手估价</button>
+      </div><!-- /panelManual -->
+    </section>
+
+    <!-- 右侧: 估价结果 -->
+    <section class="card result-card" id="result" hidden>
+      <h2 id="resultTitle">估价结果</h2>
+
+      <div class="price-grid">
+        <div class="price-box fair">
+          <div class="price-label">预期成交价</div>
+          <div class="price-value" id="priceFair">—</div>
+        </div>
+        <div class="price-box">
+          <div class="price-label">建议挂牌价</div>
+          <div class="price-value sub" id="priceListing">—</div>
+        </div>
+        <div class="price-box">
+          <div class="price-label">急售价</div>
+          <div class="price-value sub" id="priceQuick">—</div>
+        </div>
+      </div>
+
+      <div id="warnings" class="warnings"></div>
+
+      <h3>价格构成明细（可解释）</h3>
+      <table class="breakdown" id="breakdown"></table>
+
+      <div id="xianyuBox" class="xianyu-card" hidden>
+        <h3 style="margin:0 0 8px">🛒 闲鱼比价</h3>
+        <div class="xianyu-grid">
+          <div class="xianyu-item"><span class="xianyu-label">闲鱼均价</span><span class="xianyu-val" id="xyAvg">—</span></div>
+          <div class="xianyu-item"><span class="xianyu-label">最低价</span><span class="xianyu-val" id="xyMin">—</span></div>
+          <div class="xianyu-item"><span class="xianyu-label">最高价</span><span class="xianyu-val" id="xyMax">—</span></div>
+        </div>
+        <div class="xianyu-compare" id="xyCompare"></div>
+        <div class="xianyu-note" id="xyNote" style="color:var(--muted);font-size:11px;margin-top:6px"></div>
+      </div>
+
+      <div class="source-line" id="sourceLine"></div>
+      <p class="disclaimer" id="disclaimer"></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    示例项目 · 估价为模型测算仅供参考 · 新车指导价来自公开检索并由抓取任务定期刷新
+  </footer>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

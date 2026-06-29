@@ -1,0 +1,56 @@
+name: 全量车型发现(每周)
+
+on:
+  schedule:
+    # 每周日北京时间 06:00 (UTC 22:00 周六)
+    - cron: '0 22 * * 6'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90  # 全量发现耗时长
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 安装 Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: 全量发现 + 增量刷新
+        run: node server/scraper/run-once.js --discover
+        env:
+          CHROME_PATH: ${{ env.CHROME_PATH }}
+
+      - name: 同步种子数据
+        run: npm run sync-seed
+
+      - name: 提交更新
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/models.seed.json
+
+          if git diff --staged --quiet; then
+            echo "数据无变化, 跳过提交"
+          else
+            NOW=$(date -u +"%Y-%m-%d")
+            git commit -m "chore(scrape): 每周全量车型发现 ($NOW)"
+            git push
+            echo "已提交并推送更新"
+          fi

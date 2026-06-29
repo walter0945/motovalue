@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>发布车源 · 摩估</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🏍️ 摩估 <span>MotoValue</span></div>
+    <div class="slogan">符合国情的二手摩托车价格评估</div>
+    <nav class="nav">
+      <a href="/index.html">估价</a>
+      <a href="/market.html">市场</a>
+      <a href="/sell.html">发布</a>
+      <a href="/market.html?mine=1">我的发布</a>
+    </nav>
+  </header>
+
+  <main class="container" style="max-width:680px">
+    <div class="demo-banner">⚠️ 发布与交易为<b>演示占位</b>，当前不投入运营。你仍可体验"按车况科学估价 → 生成挂牌"的完整流程。</div>
+    <h1 class="page-title">发布二手车 · 按车况科学定价</h1>
+
+    <section class="card">
+      <div class="row">
+        <label>品牌<select id="brand"></select></label>
+        <label>车型<select id="model"></select></label>
+      </div>
+      <div class="newprice-hint" id="newPriceHint"></div>
+
+      <div class="row">
+        <label>使用年限（年）<input type="number" id="ageYears" min="0" max="15" step="0.5" value="3" /></label>
+        <label>行驶里程（公里）<input type="number" id="mileageKm" min="0" step="500" value="20000" /></label>
+      </div>
+      <div class="row">
+        <label>外观成色<select id="appearance"></select></label>
+        <label>机械状况<select id="mechanical"></select></label>
+      </div>
+      <div class="row">
+        <label>事故情况<select id="accident"></select></label>
+        <label>改装情况<select id="modification"></select></label>
+      </div>
+      <div class="row">
+        <label>保养记录<select id="maintenance"></select></label>
+        <label>排放标准<select id="emission"></select></label>
+      </div>
+      <div class="row">
+        <label>手续完整度<select id="docs"></select></label>
+        <label>所在地政策<select id="region"></select></label>
+      </div>
+      <div class="row">
+        <label>过户记录<select id="transfer"></select></label>
+        <label></label>
+      </div>
+
+      <button id="estimate" class="btn-ghost" style="width:100%;margin-bottom:8px">① 按车况估一下价</button>
+      <div class="suggest" id="suggest" hidden></div>
+
+      <div class="row">
+        <label>挂牌价（元）<input type="number" id="askingPrice" min="0" step="100" placeholder="估价后自动填入，可改" /></label>
+        <label>所在城市<input type="text" id="city" placeholder="如 成都" /></label>
+      </div>
+      <label>标题<input type="text" id="title" placeholder="留空则用 品牌+车型" /></label>
+      <label>联系方式（必填）<input type="text" id="contact" placeholder="微信 / 手机号" /></label>
+      <label>车况描述<input type="text" id="description" placeholder="一句话补充，如：一手车，原厂无事故" /></label>
+
+      <button id="publish" class="btn-primary">② 发布到市场</button>
+    </section>
+  </main>
+
+  <footer class="foot">示例项目 · 发布即生成科学估价快照，买家可对比你的定价</footer>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/sell.js"></script>
+</body>
+</html>
