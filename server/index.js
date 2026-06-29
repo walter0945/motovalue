@@ -19,6 +19,15 @@ import './cloudbase.js';
 const app = express();
 const PORT = process.env.PORT || 9000;  // CloudBase HTTP 云函数默认 9000
 
+// CloudBase HTTP 云函数: 请求路径不含函数名, 自动补 /api 前缀
+// 例: /brands → /api/brands (匹配已有 Express 路由)
+app.use((req, _res, next) => {
+  if (!req.path.includes('.') && !req.path.startsWith('/api/')) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.static(join(__dirname, '..', 'public')));
 
@@ -237,6 +246,28 @@ app.listen(PORT, () => {
     console.info(`[抓取] 定时刷新已启用 (全量发现: ${process.env.SCRAPE_DISCOVER === '1' ? '开' : '关'})`);
   }
 });
+
+// —— 种子数据导入 (一次性, 仅 CloudBase) ——
+app.post('/api/seed', wrap(async (req, res) => {
+  const fs = await import('node:fs/promises');
+  const path = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const __d = path.dirname(fileURLToPath(import.meta.url));
+  const seedPath = path.join(__d, 'data', 'models.seed.json');
+
+  let raw;
+  try {
+    raw = await fs.readFile(seedPath, 'utf-8');
+  } catch {
+    res.json({ ok: false, error: 'seed file not found' });
+    return;
+  }
+
+  const { models } = JSON.parse(raw);
+  const { upsertModels } = await import('./db.js');
+  const result = await upsertModels(models);
+  res.json({ ok: true, total: models.length, ...result });
+}));
 
 // CloudBase HTTP 云函数入口
 export const main = app;

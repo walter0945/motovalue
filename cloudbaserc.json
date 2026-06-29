@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "envId": "{{env.TCB_ENV_ID}}",
+  "envId": "motobti-8glwgjmc38095fa0",
   "functionRoot": "./cloudfunctions",
   "functions": [
     {
@@ -10,7 +10,7 @@
       "timeout": 60,
       "memorySize": 256,
       "envVariables": {
-        "TCB_ENV_ID": "{{env.TCB_ENV_ID}}"
+        "TCB_ENV_ID": "motobti-8glwgjmc38095fa0"
       },
       "installDependency": true,
       "preDeploy": "node scripts/build-cf.js"

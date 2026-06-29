@@ -16,7 +16,11 @@ export async function getCloudBase() {
   ready = (async () => {
     try {
       cloudbase = (await import('@cloudbase/node-sdk')).default;
-      const app = cloudbase.init({ env: process.env.TCB_ENV_ID });
+      const initOpts = { env: process.env.TCB_ENV_ID };
+      // 本地环境需显式传密钥 (云函数内自动注入)
+      if (process.env.TCB_SECRET_ID) initOpts.secretId = process.env.TCB_SECRET_ID;
+      if (process.env.TCB_SECRET_KEY) initOpts.secretKey = process.env.TCB_SECRET_KEY;
+      const app = cloudbase.init(initOpts);
       db = app.database();
       modelsCol = db.collection('moto_models');
       listingsCol = db.collection('moto_listings');

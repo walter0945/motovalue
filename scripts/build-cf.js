@@ -19,6 +19,11 @@ const FILES = [
 // 需复制的目录 (含子文件)
 const DIRS = ['scraper'];
 
+// 额外: 种子数据文件
+const EXTRA = [
+  ['data/models.seed.json', 'data/models.seed.json'],
+];
+
 try {
   await mkdir(DEST, { recursive: true });
 
@@ -32,7 +37,13 @@ try {
     console.log(`  ✓ ${d}/`);
   }
 
-  console.log(`\n[build-cf] 已构建 cloudfunctions/api/ (${FILES.length + DIRS.length} 项)`);
+  for (const [src, dst] of EXTRA) {
+    await mkdir(dirname(join(DEST, dst)), { recursive: true }).catch(() => {});
+    await cp(join(ROOT, src), join(DEST, dst), { force: true });
+    console.log(`  ✓ ${src}`);
+  }
+
+  console.log(`\n[build-cf] 已构建 cloudfunctions/api/ (${FILES.length + DIRS.length + EXTRA.length} 项)`);
 } catch (err) {
   console.error('[build-cf] 构建失败:', err.message);
   process.exit(1);

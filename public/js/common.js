@@ -9,11 +9,12 @@ const fmt = (n) => `¥${Number(n).toLocaleString('zh-CN')}`;
 /** 自动检测 CloudBase 环境, 设置 API 基地址 */
 const API_BASE = (() => {
   const host = location.hostname;
-  // CloudBase 静态托管: https://{env-id}.tcloudbaseapp.com
-  // 对应云函数: https://{env-id}.service.tcloudbase.com/api
+  // CloudBase 静态托管: https://{env-id}-{数}.tcloudbaseapp.com
+  // 对应 HTTP 网关: https://{env-id}.service.tcloudbase.com
   if (host.includes('tcloudbaseapp.com')) {
-    const envId = host.split('.')[0];
-    return `https://${envId}.service.tcloudbase.com/api`;
+    // 提取 env-id (去掉末尾的 -数字 后缀)
+    const envId = host.split('.')[0].replace(/-\d+$/, '');
+    return `https://${envId}.service.tcloudbase.com`;
   }
   // 本地开发: 相对路径
   return '';

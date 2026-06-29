@@ -23,6 +23,6 @@
     "puppeteer-core": "^25.2.1"
   },
   "devDependencies": {
-    "@cloudbase/node-sdk": "^2.0.0"
+    "@cloudbase/node-sdk": "^2.11.0"
   }
 }

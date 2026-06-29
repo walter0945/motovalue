@@ -104,31 +104,39 @@ export async function upsertModels(incoming) {
   if (tcb) {
     let added = 0, updated = 0;
     const today = new Date().toISOString().slice(0, 10);
-    const ops = incoming.map(async (m) => {
-      const { data } = await tcb.modelsCol.where({ id: m.id }).limit(1).get();
-      if (data && data.length) {
-        const e = data[0];
-        if (e.price !== m.price || !e.priceVerified) {
-          await tcb.modelsCol.doc(e._id).update({
-            price: m.price ?? e.price, source: m.source ?? e.source,
-            ref: m.ref ?? e.ref, priceVerified: true, updatedAt: today,
+    const BATCH = 10; // 控制并发, 避免 EMFILE
+    for (let i = 0; i < incoming.length; i += BATCH) {
+      const batch = incoming.slice(i, i + BATCH);
+      const results = await Promise.all(batch.map(async (m) => {
+        try {
+          const { data } = await tcb.modelsCol.where({ id: m.id }).limit(1).get();
+          if (data && data.length) {
+            const e = data[0];
+            if (e.price !== m.price || !e.priceVerified) {
+              await tcb.modelsCol.doc(e._id).update({
+                price: m.price ?? e.price, source: m.source ?? e.source,
+                ref: m.ref ?? e.ref, priceVerified: true, updatedAt: today,
+              });
+              return { added: 0, updated: 1 };
+            }
+            return { added: 0, updated: 0 };
+          }
+          await tcb.modelsCol.add({
+            id: m.id, brand: m.brand || '未知', name: m.name || m.id,
+            category: m.category || '街车', displacement: m.displacement || 0,
+            price: m.price || 0, tier: m.tier || 'DOMESTIC_TOP',
+            emission: m.emission || '国四', source: m.source || '',
+            ref: m.ref || m.source || '', priceVerified: true, updatedAt: today,
           });
-          return { added: 0, updated: 1 };
+          return { added: 1, updated: 0 };
+        } catch (err) {
+          console.warn(`[db] upsert ${m.id}: ${err.message}`);
+          return { added: 0, updated: 0 };
         }
-        return { added: 0, updated: 0 };
-      }
-      await tcb.modelsCol.add({
-        id: m.id, brand: m.brand || '未知', name: m.name || m.id,
-        category: m.category || '街车', displacement: m.displacement || 0,
-        price: m.price || 0, tier: m.tier || 'DOMESTIC_TOP',
-        emission: m.emission || '国四', source: m.source || '',
-        ref: m.ref || m.source || '', priceVerified: true, updatedAt: today,
-      });
-      return { added: 1, updated: 0 };
-    });
-    const results = await Promise.all(ops);
-    added = results.reduce((s, r) => s + r.added, 0);
-    updated = results.reduce((s, r) => s + r.updated, 0);
+      }));
+      added += results.reduce((s, r) => s + r.added, 0);
+      updated += results.reduce((s, r) => s + r.updated, 0);
+    }
     return { added, updated };
   }
 
